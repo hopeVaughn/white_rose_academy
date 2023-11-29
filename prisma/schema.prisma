@@ -52,7 +52,6 @@ model User {
   sessions Session[]
 }
 
-// course contains many units
 model Course {
   id    String @id @default(cuid())
   name  String
@@ -60,7 +59,6 @@ model Course {
   units Unit[]
 }
 
-// unit contains many chapters
 model Unit {
   id       String @id @default(cuid())
   courseId String

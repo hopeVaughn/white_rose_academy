@@ -102,7 +102,7 @@ const CreateCourseForm = (props: Props) => {
                 onClick={() => {
                   form.setValue('units', [...form.watch('units'), '']);
                 }}
-              >Add Module
+              >Add
                 <Plus className="w-4 h-4 ml-2 text-green-500" />
               </Button>
               <Button
@@ -112,7 +112,7 @@ const CreateCourseForm = (props: Props) => {
                 onClick={() => {
                   form.setValue('units', form.watch('units').slice(0, -1));
                 }}
-              >Remove Module
+              >Remove
                 <Trash className="w-4 h-4 ml-2 text-red-500" />
               </Button>
             </div>

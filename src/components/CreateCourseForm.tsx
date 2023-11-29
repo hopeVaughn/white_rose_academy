@@ -28,6 +28,7 @@ const CreateCourseForm = (props: Props) => {
   }
 
   form.watch();
+  console.log(form.watch());
 
   return (
     <div className='w-full'>
@@ -84,7 +85,7 @@ const CreateCourseForm = (props: Props) => {
                 variant='secondary'
                 className='font-semibold'
                 onClick={() => {
-                  form.setValue('units', [...form.watch('units')]);
+                  form.setValue('units', [...form.watch('units'), '']);
                 }}
               >Add Module
                 <Plus className="w-4 h-4 ml-2 text-green-500" />
@@ -93,7 +94,9 @@ const CreateCourseForm = (props: Props) => {
                 type="button"
                 variant='secondary'
                 className='font-semibold ml-2'
-
+                onClick={() => {
+                  form.setValue('units', form.watch('units').slice(0, -1));
+                }}
               >Remove Module
                 <Trash className="w-4 h-4 ml-2 text-red-500" />
               </Button>

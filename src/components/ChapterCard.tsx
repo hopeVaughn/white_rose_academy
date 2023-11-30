@@ -2,17 +2,39 @@
 import { cn } from '@/lib/utils';
 import { Chapter } from '@prisma/client';
 import React from 'react';
-import { Separator } from './ui/separator';
-import Link from 'next/link';
-import { buttonVariants } from './ui/button';
+import { useMutation } from '@tanstack/react-query';
+import axios from 'axios';
 
 type Props = {
   chapter: Chapter;
   chapterIndex: number;
 };
 
-const ChapterCard = ({ chapter, chapterIndex }: Props) => {
+export type ChapterCardHandler = {
+  triggerLoad: () => void;
+};
+const ChapterCard = React.forwardRef<ChapterCardHandler, Props>(({ chapter, chapterIndex }, ref) => {
+
   const [success, setSuccess] = React.useState<boolean | null>(null);
+  const { mutate: getChapterInfo, isPending } = useMutation({
+    mutationFn: async () => {
+      const response = await axios.post('/api/chapter/getInfo', { chapterId: chapter.id });
+      return response.data;
+    }
+  });
+  React.useImperativeHandle(ref, () => ({
+    async triggerLoad() {
+      getChapterInfo(undefined, {
+        onSuccess: (data) => {
+          console.log("WE DID IT!");
+
+        },
+        onError: () => {
+          setSuccess(false);
+        }
+      });
+    }
+  }));
   return (
     <div
       key={chapter.id}
@@ -30,6 +52,7 @@ const ChapterCard = ({ chapter, chapterIndex }: Props) => {
       <h5>Chapter {chapterIndex + 1}: {chapter.name}</h5>
     </div>
   );
-};
+});
 
+ChapterCard.displayName = 'ChapterCard';
 export default ChapterCard;

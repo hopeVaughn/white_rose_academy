@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 import { Course, Unit, Chapter } from '@prisma/client';
-import ChapterCard from './ChapterCard';
+import ChapterCard, { ChapterCardHandler } from './ChapterCard';
 import { Separator } from './ui/separator';
 import Link from 'next/link';
 import { Button, buttonVariants } from './ui/button';
@@ -16,6 +16,15 @@ type Props = {
 };
 
 const ConfirmChapters = ({ course }: Props) => {
+  const chapterRefs: Record<string, React.RefObject<ChapterCardHandler>> = {};
+  course.units.forEach((unit) => {
+    unit.chapters.forEach((chapter) => {
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      chapterRefs[chapter.id] = React.useRef(null);
+    });
+  });
+  console.log(chapterRefs);
+
   return (
     <div className='w-full mt-4'>
       {course.units.map((unit, unitIndex) => {
@@ -29,6 +38,7 @@ const ConfirmChapters = ({ course }: Props) => {
               {unit.chapters.map((chapter, chapterIndex) => {
                 return (
                   <ChapterCard
+                    ref={chapterRefs[chapter.id]}
                     key={chapter.id}
                     chapter={chapter}
                     chapterIndex={chapterIndex} />
@@ -49,7 +59,11 @@ const ConfirmChapters = ({ course }: Props) => {
           <Button
             type='button'
             className='ml-4 font-semibold'
-            onClick={() => { }}
+            onClick={() => {
+              Object.values(chapterRefs).forEach((ref) => {
+                ref.current?.triggerLoad();
+              });
+            }}
           >
             Create
             <ChevronRight className='w-4 h-4 ml-2' strokeWidth={4} />

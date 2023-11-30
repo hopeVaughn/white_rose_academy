@@ -35,3 +35,7 @@ export async function getTranscript(videoId: string) {
     return "";
   }
 }
+
+export async function getQuestionsFromTranscript(transcript: string, course_title: string) {
+  // return things
+}

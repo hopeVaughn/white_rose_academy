@@ -48,15 +48,21 @@ model User {
   image         String?
   credits       Int       @default(5)
 
-  accounts Account[]
-  sessions Session[]
+  accounts          Account[]
+  sessions          Session[]
+  subscribedCourses Course[]
 }
 
 model Course {
-  id    String @id @default(cuid())
+  id     String @id @default(cuid())
+  userId String
+
   name  String
   image String
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   units Unit[]
+
+  @@index([userId], name: "userId")
 }
 
 model Unit {
@@ -64,7 +70,7 @@ model Unit {
   courseId String
 
   name     String
-  course   Course    @relation(fields: [courseId], references: [id])
+  course   Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
   chapters Chapter[]
 
   @@index([courseId], name: "courseId")
@@ -78,7 +84,7 @@ model Chapter {
   youtubeSearchQuery String
   videoId            String?
   summary            String?    @db.VarChar(3000)
-  unit               Unit       @relation(fields: [unitId], references: [id])
+  unit               Unit       @relation(fields: [unitId], references: [id], onDelete: Cascade)
   questions          Question[]
 
   @@index([unitId], name: "unitId")
@@ -91,7 +97,7 @@ model Question {
   question String  @db.VarChar(3000)
   answer   String  @db.VarChar(3000)
   options  String  @db.VarChar(3000)
-  chapter  Chapter @relation(fields: [chapterId], references: [id])
+  chapter  Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
 
   @@index([chapterId], name: "chapterId")
 }

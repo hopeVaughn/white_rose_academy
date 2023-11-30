@@ -4,6 +4,7 @@ import ChapterCard from './ChapterCard';
 
 type Props = {
   course: Course & {
+    userId: string;
     units: (Unit & {
       chapters: Chapter[];
     })[];

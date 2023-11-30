@@ -1,14 +1,21 @@
 // /api/course/generateChapters
-
 import { NextResponse } from "next/server";
 import { createChapterSchema } from "@/validators/course";
 import { ZodError } from "zod";
 import { strict_output } from "@/lib/gpt";
 import { getUnsplashImage } from "@/lib/unslpash";
 import { prisma } from "@/lib/db";
+import { getAuthSession } from "@/lib/auth";
 
 export async function POST(req: Request, res: Response) {
   try {
+    const session = await getAuthSession();
+    if (!session || !session.user || !session.user.id) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+    const userId = session.user.id;
+
+
     const body = await req.json();
     const { title, units } = createChapterSchema.parse(body);
 
@@ -45,6 +52,7 @@ export async function POST(req: Request, res: Response) {
       data: {
         name: title,
         image: courseImage,
+        user: { connect: { id: userId } },
       }
     });
 

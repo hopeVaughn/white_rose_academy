@@ -56,11 +56,10 @@ model User {
 model Course {
   id     String @id @default(cuid())
   userId String
-
-  name  String
-  image String
-  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  units Unit[]
+  name   String
+  image  String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  units  Unit[]
 
   @@index([userId], name: "userId")
 }

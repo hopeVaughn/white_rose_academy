@@ -4,6 +4,8 @@ import { NextResponse } from "next/server";
 import { createChapterSchema } from "@/validators/course";
 import { ZodError } from "zod";
 import { strict_output } from "@/lib/gpt";
+import { getUnsplashImage } from "@/lib/unslpash";
+import { prisma } from "@/lib/db";
 
 export async function POST(req: Request, res: Response) {
   try {
@@ -16,7 +18,7 @@ export async function POST(req: Request, res: Response) {
         youtube_search_query: string;
         chapter_title: string;
       }[];
-    };
+    }[];
 
     let output_unit: outputUnit = await strict_output(
       "You are an advanced AI teacher that curates courses for students. You are to generate relevant chapters and their titles, given the course title and units. You are to generate a list of chapters for each unit. You are to find the most relevant youtube search query for each chapter.",
@@ -36,8 +38,35 @@ export async function POST(req: Request, res: Response) {
         image_search_term: 'appropriate image search term for the course'
       }
     );
-    console.log(output_unit);
-    return NextResponse.json({ output_unit, imageSearchTerm });
+
+    const courseImage = await getUnsplashImage(imageSearchTerm.image_search_term);
+
+    const course = await prisma.course.create({
+      data: {
+        name: title,
+        image: courseImage,
+      }
+    });
+
+    for (const unit of output_unit) {
+      const title = unit.title;
+      const prismaUnit = await prisma.unit.create({
+        data: {
+          name: title,
+          courseId: course.id,
+        },
+      });
+      await prisma.chapter.createMany({
+        data: unit.chapters.map((chapter) => {
+          return {
+            name: chapter.chapter_title,
+            youtubeSearchQuery: chapter.youtube_search_query,
+            unitId: prismaUnit.id,
+          };
+        }),
+      });
+    }
+    return NextResponse.json({ course_id: course.id });
 
   } catch (error) {
     if (error instanceof ZodError) {

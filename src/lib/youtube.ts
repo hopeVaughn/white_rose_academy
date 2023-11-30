@@ -15,7 +15,6 @@ export async function searchYoutube(searchQuery: string) {
     console.log("youtube fail");
     return null;
   }
-  console.log(data.items[0].id.videoId);
 
   return data.items[0].id.videoId;
 }
@@ -30,7 +29,6 @@ export async function getTranscript(videoId: string) {
     for (let t of transcript_arr) {
       transcript += t.text + " ";
     }
-    console.log(transcript);
 
     return transcript.replaceAll("\n", "");
   } catch (error) {

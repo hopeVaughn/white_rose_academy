@@ -29,7 +29,6 @@ export async function POST(req: Request, res: Response) {
       );
     }
     const videoId = await searchYoutube(chapter.youtubeSearchQuery);
-    console.log(videoId);
 
     let transcript = await getTranscript(videoId);
     let maxLength = 500;

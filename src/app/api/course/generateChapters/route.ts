@@ -1,4 +1,3 @@
-// /api/course/generateChapters
 import { NextResponse } from "next/server";
 import { createChapterSchema } from "@/validators/course";
 import { ZodError } from "zod";
@@ -6,6 +5,16 @@ import { strict_output } from "@/lib/gpt";
 import { getUnsplashImage } from "@/lib/unslpash";
 import { prisma } from "@/lib/db";
 import { getAuthSession } from "@/lib/auth";
+
+type Chapter = {
+  chapter_title: string;
+  youtube_search_query: string;
+};
+
+type Unit = {
+  unit_title: string;
+  chapters: Chapter[];
+};
 
 export async function POST(req: Request, res: Response) {
   try {
@@ -15,70 +24,64 @@ export async function POST(req: Request, res: Response) {
     }
     const userId = session.user.id;
 
-
     const body = await req.json();
     const { title, units } = createChapterSchema.parse(body);
 
-    type outputUnit = {
-      title: string;
-      chapters: {
-        youtube_search_query: string;
-        chapter_title: string;
-      }[];
-    }[];
+    const systemPromptForUnits = `You are an advanced AI teacher capable of generating course details in JSON format. Generate relevant chapters and their titles for a course titled '${title}', consisting of ${units.length} units. Each unit should be a JSON object containing the unit title and an array of chapters, each with a youtube_search_query and a chapter_title.`;
 
-    let output_unit: outputUnit = await strict_output(
-      "You are an advanced AI teacher that curates courses for students. You are to generate relevant chapters and their titles, given the course title and units. You are to generate a list of chapters for each unit. You are to find the most relevant youtube search query for each chapter.",
-      new Array(units.length).fill(
-        `As the course curator and teacher, please generate a course about ${title}. The students will need chapters for each of the units provided. For each chapter please provide a detailed youtube search query that can be used to find an informative, relevant, and educational video for each chapter. Each query should give the appropriate educational, relevant, and informative video in youtube.`
-      ),
-      {
-        title: 'title of the unit',
-        chapters: 'an array of chapters, each chapter should have a youtube_search_query and a chapter_title key in the JSON object'
-      },
+    const userPromptForUnits = new Array(units.length).fill(
+      `Generate a course about ${title}. Provide chapters for each unit with detailed youtube search queries for informative, relevant, and educational videos.`
     );
 
-    const imageSearchTerm = await strict_output(
-      'you are an AI capable of retrieving the most appropriate and relevant image for a course',
-      `Please provide an appropriate image search term for the course ${title}. This search term will be used with the unsplash API. Please ensure that the search term will return the best results`,
-      {
-        image_search_term: 'appropriate image search term for the course'
-      }
-    );
+    let outputUnitResponse = await strict_output(systemPromptForUnits, userPromptForUnits);
+    let outputUnit: Unit[] = outputUnitResponse && outputUnitResponse.units ? outputUnitResponse.units : [];
 
-    const courseImage = await getUnsplashImage(imageSearchTerm.image_search_term);
+    const systemPromptForImage = `You are an AI capable of retrieving the most appropriate and relevant image for a course titled '${title}'. Output the image search term in JSON format for use with the Unsplash API.`;
+
+    const userPromptForImage = `Provide an image search term for the course '${title}'.`;
+
+    const imageSearchResponse = await strict_output(systemPromptForImage, userPromptForImage);
+    const imageSearchTerm = imageSearchResponse ? imageSearchResponse.image_search_term : '';
+
+    const courseImage = await getUnsplashImage(imageSearchTerm);
+    console.log(outputUnit);
 
     const course = await prisma.course.create({
       data: {
         name: title,
         image: courseImage,
         user: { connect: { id: userId } },
-      }
+      },
     });
+    for (const unitResponse of outputUnit) {
+      if (!unitResponse.unit_title || typeof unitResponse.unit_title !== 'string') {
+        console.error('Missing or invalid title in unit:', unitResponse);
+        continue;
+      }
 
-    for (const unit of output_unit) {
-      const title = unit.title;
       const prismaUnit = await prisma.unit.create({
         data: {
-          name: title,
+          name: unitResponse.unit_title, // Use 'unit_title' from the response
           courseId: course.id,
         },
       });
+
       await prisma.chapter.createMany({
-        data: unit.chapters.map((chapter) => {
-          return {
-            name: chapter.chapter_title,
-            youtubeSearchQuery: chapter.youtube_search_query,
-            unitId: prismaUnit.id,
-          };
-        }),
+        data: unitResponse.chapters.map((chapter: Chapter) => ({
+          name: chapter.chapter_title,
+          youtubeSearchQuery: chapter.youtube_search_query,
+          unitId: prismaUnit.id,
+        })),
       });
     }
-    return NextResponse.json({ course_id: course.id });
 
+    return NextResponse.json({ course_id: course.id });
   } catch (error) {
     if (error instanceof ZodError) {
       return new NextResponse("Invalid body", { status: 400 });
+    } else {
+      console.error(error);
+      return new NextResponse("An unexpected error occurred", { status: 500 });
     }
   }
 }

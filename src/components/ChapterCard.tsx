@@ -17,13 +17,24 @@ type Props = {
 export type ChapterCardHandler = {
   triggerLoad: () => void;
 };
+
 const ChapterCard = React.forwardRef<ChapterCardHandler, Props>(({ chapter, chapterIndex, completedChapterIds, setCompletedChapterIds }, ref) => {
   const { toast } = useToast();
   const [success, setSuccess] = React.useState<boolean | null>(null);
   const { mutate: getChapterInfo, isPending } = useMutation({
     mutationFn: async () => {
-      const response = await axios.post('/api/chapter/getInfo', { chapterId: chapter.id });
-      return response.data;
+      try {
+        const response = await axios.post('/api/chapter/getInfo', { chapterId: chapter.id });
+        return response.data;
+      } catch (error) {
+        // Log detailed error
+        if (axios.isAxiosError(error)) {
+          console.error('Axios Error:', error.response?.data || error.message);
+        } else {
+          console.error('Unexpected Error:', error);
+        }
+        throw error;
+      }
     }
   });
 
@@ -39,7 +50,6 @@ const ChapterCard = React.forwardRef<ChapterCardHandler, Props>(({ chapter, chap
     if (chapter.videoId) {
       setSuccess(true);
       addChapterIdToSet();
-      addChapterIdToSet;
     }
   }, [chapter, addChapterIdToSet]);
 
@@ -55,7 +65,6 @@ const ChapterCard = React.forwardRef<ChapterCardHandler, Props>(({ chapter, chap
           addChapterIdToSet();
         },
         onError: (error) => {
-          console.log(error);
           setSuccess(false);
           toast({
             title: 'Error',
@@ -67,19 +76,15 @@ const ChapterCard = React.forwardRef<ChapterCardHandler, Props>(({ chapter, chap
       });
     }
   }));
+
   return (
     <div
       key={chapter.id}
-      className={
-        cn(
-          'px-4 py-2 mt-2 rounded flex justify-between',
-          {
-            'bg-secondary': success === null,
-            'bg-red-500': success === false,
-            'bg-green-500': success === true,
-          }
-        )
-      }
+      className={cn('px-4 py-2 mt-2 rounded flex justify-between', {
+        'bg-secondary': success === null,
+        'bg-red-500': success === false,
+        'bg-green-500': success === true,
+      })}
     >
       <h5>Chapter {chapterIndex + 1}: {chapter.name}</h5>
       {isPending && <Loader2 className='animate-spin' />}

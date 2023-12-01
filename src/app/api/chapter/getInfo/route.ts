@@ -34,15 +34,14 @@ export async function POST(req: Request, res: Response) {
     }
     const videoId = await searchYoutube(chapter.youtubeSearchQuery);
     let transcript = await getTranscript(videoId);
-    let maxLength = 500;
+    let maxLength = 2000;
     transcript = transcript.split(" ").slice(0, maxLength).join(" ");
 
-    const { summary }: { summary: string; } = await strict_output(
-      "You are an AI capable of summarizing a youtube transcript",
-      "summaries in 250 words or less and do not talk of the sponsors or anything unrelated to the main topic, also do not introduce what the summary is about.\n" +
-      transcript,
-      { summary: "summary of the transcript" }
-    );
+    const systemPromptForSummary = `You are an AI capable of summarizing a YouTube transcript in JSON format. Summarize the following transcript in 250 words or less, avoiding mention of sponsors or unrelated topics.`;
+    // Get summary from AI
+    const { summary } = await strict_output(systemPromptForSummary, transcript);
+
+    console.log(summary);
 
     const questions = await getQuestionsFromTranscript(
       transcript,
@@ -89,7 +88,7 @@ export async function POST(req: Request, res: Response) {
       return NextResponse.json(
         {
           success: false,
-          error: "unknown",
+          error: error,
         },
         { status: 500 }
       );

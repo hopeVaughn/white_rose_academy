@@ -64,7 +64,6 @@ const CreateCourseForm = (props: Props) => {
   }
 
   form.watch();
-  console.log(form.watch());
 
   return (
     <div className='w-full'>

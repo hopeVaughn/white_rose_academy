@@ -36,7 +36,6 @@ export async function strict_output(
 
       // Using Array() constructor to convert the object to an array
       const arrayOutput = Array(parsedOutput);
-
       console.log("GPT FUNCTION TO ARRAY: ", arrayOutput);
       return arrayOutput;
     } catch (e) {

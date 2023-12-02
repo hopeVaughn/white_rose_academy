@@ -6,13 +6,11 @@ import { getUnsplashImage } from "@/lib/unslpash";
 import { prisma } from "@/lib/db";
 import { getAuthSession } from "@/lib/auth";
 
-// Assuming the structure of the Chapter type remains the same.
 type Chapter = {
   chapter_title: string;
   youtube_search_query: string;
 };
 
-// Assuming the structure of the Unit type remains the same.
 type Unit = {
   unit_title: string;
   chapters: Chapter[];
@@ -27,7 +25,7 @@ export async function POST(req: Request, res: Response) {
     const userId = session.user.id;
 
     const body = await req.json();
-    const { title, units } = createChapterSchema.parse(body);
+    const { title } = createChapterSchema.parse(body);
 
     const systemPromptForUnits = `You are an advanced AI teacher capable of generating course details in JSON format. Generate relevant chapters and their titles for a course titled '${title}'. Each unit should be a JSON object containing the unit title and an array of chapters, each with a youtube_search_query and a chapter_title.
 
@@ -55,9 +53,7 @@ export async function POST(req: Request, res: Response) {
         }
       ]
     }`;
-
     const userPromptForUnits = `Generate a course about ${title}. Provide chapters for each unit with detailed youtube search queries for informative, relevant, and educational videos.`;
-
 
     const outputResponse = await strict_output(systemPromptForUnits, userPromptForUnits);
 
@@ -67,18 +63,30 @@ export async function POST(req: Request, res: Response) {
 
     const outputUnits = outputResponse[0].units || [];
 
-    const systemPromptForImage = `You are an AI capable of retrieving the most appropriate and relevant image for a course titled '${title}'. Output the image search term in JSON format for use with the Unsplash API.`;
+    const systemPromptForImage = `You are an AI capable of retrieving the most appropriate and relevant image for a course titled: '${title}'. Output the image search term in JSON format for use with the Unsplash API.
+
+    Example Format:
+    {
+      "searchTerm": "appropriate image search term for the course"
+    }`;
+
     const userPromptForImage = `Provide an image search term for the course '${title}'.`;
 
     const imageSearchResponse = await strict_output(systemPromptForImage, userPromptForImage);
-    const imageSearchTerm = imageSearchResponse ? imageSearchResponse.search_term : '';
-    const courseImage = await getUnsplashImage(imageSearchTerm);
+    console.log("IMAGE SEARCH RESPONSE /generateChapters: ", imageSearchResponse);
+
+    let courseImage = '';
+    if (Array.isArray(imageSearchResponse) && imageSearchResponse.length > 0 && typeof imageSearchResponse[0] === 'object' && 'searchTerm' in imageSearchResponse[0]) {
+      courseImage = await getUnsplashImage(imageSearchResponse[0].searchTerm);
+    } else {
+      console.error("Invalid response format for image search term");
+    }
 
     const course = await prisma.course.create({
       data: {
         name: title,
         image: courseImage,
-        user: { connect: { id: session.user.id } },
+        user: { connect: { id: userId } },
       },
     });
 
@@ -92,7 +100,7 @@ export async function POST(req: Request, res: Response) {
 
       if (unit.chapters && Array.isArray(unit.chapters)) {
         await prisma.chapter.createMany({
-          data: unit.chapters.map((chapter) => ({
+          data: unit.chapters.map((chapter: Chapter) => ({
             name: chapter.chapter_title,
             youtubeSearchQuery: chapter.youtube_search_query,
             unitId: prismaUnit.id,
@@ -100,7 +108,6 @@ export async function POST(req: Request, res: Response) {
         });
       }
     }
-
 
     return NextResponse.json({ course_id: course.id });
   } catch (error) {

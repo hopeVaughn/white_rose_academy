@@ -7,7 +7,7 @@ const openai = new OpenAI({
 export async function strict_output(
   system_prompt: string,
   user_prompt: string | string[],
-  model: string = "gpt-3.5-turbo-1106",
+  model: string = "gpt-4-1106-preview",
   temperature: number = 1,
   num_tries: number = 3,
   verbose: boolean = false

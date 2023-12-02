@@ -49,7 +49,7 @@ export async function getQuestionsFromTranscript(
   transcript: string,
   course_name: string
 ): Promise<Question[]> {
-  const systemPrompt = `You are a helpful AI assistant capable of generating MCQ questions and answers in JSON format, suitable for storing in a database. Each question should include a question text, a correct answer, and three incorrect options. Each answer should not be more than 15 words. Generate questions about ${course_name} based on the following transcript:
+  const systemPrompt = `You are a helpful AI assistant capable of generating MCQ questions and answers in JSON format, suitable for storing in a database. Each question should include a question text, a correct answer, and only three incorrect options. Each answer should not be more than 15 words. Generate questions about ${course_name} based on the following transcript:
 
   Example Format:
   

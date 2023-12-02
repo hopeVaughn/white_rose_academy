@@ -24,7 +24,7 @@ const CourseSideBar = async ({ course, currentChapterid }: Props) => {
           {unit.chapters.map((chapter, chapterIndex) => {
             return <div key={chapter.id}>
               <Link
-                href={`course/${course.id}/${unitIndex}/${chapterIndex}`}
+                href={`/course/${course.id}/${unitIndex}/${chapterIndex}`}
                 className={cn('text-secondary-foreground/60', {
                   "text-green-500 font-bold":
                     chapter.id === currentChapterid

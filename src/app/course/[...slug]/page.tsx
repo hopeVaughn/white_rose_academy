@@ -30,7 +30,7 @@ const CoursePage = async ({ params: { slug } }: Props) => {
     }
   });
 
-  console.log("COURSE FROM /course/[...slug]/page.tsx", course?.units[0].chapters[0].questions);
+  console.log("COURSE FROM /course/[...slug]/page.tsx", course?.units);
 
   if (!course) {
     return redirect('/gallery');
@@ -63,7 +63,6 @@ const CoursePage = async ({ params: { slug } }: Props) => {
           </div>
         </div>
       </section>
-
     </main>
   );
 

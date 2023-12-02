@@ -24,8 +24,6 @@ export async function searchYoutube(searchQuery: string) {
     return null;
   }
 
-  console.log(data.items[0].id.videoId);
-
   return data.items[0].id.videoId;
 }
 
@@ -40,7 +38,6 @@ export async function getTranscript(videoId: string) {
       transcript += t.text + " ";
     }
 
-    console.log(transcript.replaceAll("\n", ""));
     return transcript.replaceAll("\n", "");
 
   } catch (error) {
@@ -58,9 +55,26 @@ export async function getQuestionsFromTranscript(
     `Generate an appropriate and challenging MCQ question about ${course_name} with context of the following transcript: ${transcript}`
   );
 
-  // Call strict_output and expect a JSON array of questions
+  // Call strict_output and expect a JSON array or object of questions
   const response = await strict_output(systemPrompt, userPrompt);
-  console.log('response:', response);
+  console.log("RESPONSE in YOUTUBE util", response);
 
-  return response ? response as Question[] : [];
+  // If response is an array, return it directly
+  if (Array.isArray(response)) {
+    return response;
+  }
+
+  // If response is an object, extract questions into an array
+  // if (response && typeof response === 'object') {
+  //   let questions = [];
+  //   for (let key in response) {
+  //     if (response.hasOwnProperty(key) && typeof response[key] === 'object' && response[key] !== null) {
+  //       questions.push(response[key]);
+  //     }
+  //   }
+  //   return questions;
+  // }
+
+  // If response is neither an array nor a suitable object, return an empty array
+  return [];
 }

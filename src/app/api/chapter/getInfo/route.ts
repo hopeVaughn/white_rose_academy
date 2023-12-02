@@ -39,14 +39,21 @@ export async function POST(req: Request, res: Response) {
 
     const systemPromptForSummary = `You are an AI capable of summarizing a YouTube transcript in JSON format. Summarize the following transcript in 250 words or less, avoiding mention of sponsors or unrelated topics.`;
     // Get summary from AI
-    const { summary } = await strict_output(systemPromptForSummary, transcript);
-
-    console.log(summary);
+    const summary = await strict_output(systemPromptForSummary, transcript);
 
     const questions = await getQuestionsFromTranscript(
       transcript,
       chapter.name
     );
+    console.log("QUESTIONS", questions);
+
+    await prisma.chapter.update({
+      where: { id: chapterId },
+      data: {
+        videoId: videoId,
+        summary: summary,
+      },
+    });
 
     await prisma.question.createMany({
       data: questions.map((question) => {
@@ -66,14 +73,6 @@ export async function POST(req: Request, res: Response) {
       }),
     });
 
-    await prisma.chapter.update({
-      where: { id: chapterId },
-      data: {
-        videoId: videoId,
-        summary: summary,
-      },
-    });
-
     return NextResponse.json({ success: true });
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -85,13 +84,11 @@ export async function POST(req: Request, res: Response) {
         { status: 400 }
       );
     } else {
-      return NextResponse.json(
-        {
-          success: false,
-          error: error,
-        },
-        { status: 500 }
-      );
+      console.error("Error in /api/chapter/getInfo:", error);
+      return NextResponse.json({
+        success: false,
+        error: (error as Error).message || "An unknown error occurred",
+      }, { status: 500 });
     }
   }
 }

@@ -23,7 +23,7 @@ export async function strict_output(
       response_format: { type: "json_object" },
     });
 
-    let output = response.choices[0].message.content;
+    let output = response.choices[0].message?.content;
 
     if (verbose) {
       console.log("System prompt:", system_prompt);
@@ -32,9 +32,13 @@ export async function strict_output(
     }
 
     try {
-      console.log(output ? JSON.parse(output) : null);
+      const parsedOutput = output ? JSON.parse(output) : null;
 
-      return output ? JSON.parse(output) : null;
+      // Using Array() constructor to convert the object to an array
+      const arrayOutput = Array(parsedOutput);
+
+      console.log("GPT FUNCTION TO ARRAY: ", arrayOutput);
+      return arrayOutput;
     } catch (e) {
       console.error("An exception occurred:", e);
       throw new Error("Invalid JSON format or no response received");

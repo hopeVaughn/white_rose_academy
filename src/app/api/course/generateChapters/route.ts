@@ -5,6 +5,7 @@ import { strict_output } from "@/lib/gpt";
 import { getUnsplashImage } from "@/lib/unslpash";
 import { prisma } from "@/lib/db";
 import { getAuthSession } from "@/lib/auth";
+import { checkSubscription } from "@/lib/subscription";
 
 type Chapter = {
   chapter_title: string;
@@ -23,7 +24,10 @@ export async function POST(req: Request, res: Response) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
     const userId = session.user.id;
-
+    const isEnrolled = await checkSubscription();
+    if (session.user.credits <= 0 && !isEnrolled) {
+      return new NextResponse('No available credits at this time', { status: 402 });
+    }
     const body = await req.json();
     const { title } = createChapterSchema.parse(body);
 

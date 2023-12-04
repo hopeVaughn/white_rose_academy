@@ -15,11 +15,13 @@ import axios from 'axios';
 import { useToast } from './ui/use-toast';
 import { useRouter } from 'next/navigation';
 import SubscriptionAction from './SubscriptionAction';
-type Props = {};
+type Props = {
+  isEnrolled: boolean;
+};
 
 type Input = z.infer<typeof createChapterSchema>;
 
-const CreateCourseForm = (props: Props) => {
+const CreateCourseForm = ({ isEnrolled }: Props) => {
   const router = useRouter();
   const { toast } = useToast();
   const { mutate: createChapters, isPending } = useMutation({
@@ -163,7 +165,7 @@ const CreateCourseForm = (props: Props) => {
           </Button>
         </form>
       </Form>
-      <SubscriptionAction />
+      {!isEnrolled && <SubscriptionAction />}
     </div>
   );
 };

@@ -80,7 +80,7 @@ export async function POST(req: Request, res: Response) {
     console.log("IMAGE SEARCH RESPONSE /generateChapters: ", imageSearchResponse);
 
     let courseImage = '';
-    if (Array.isArray(imageSearchResponse) && imageSearchResponse.length > 0 && typeof imageSearchResponse[0] === 'object' && 'searchTerm' in imageSearchResponse[0]) {
+    if (Array.isArray(imageSearchResponse) && imageSearchResponse.length > 0 && typeof imageSearchResponse[0] === 'object') {
       courseImage = await getUnsplashImage(imageSearchResponse[0].searchTerm);
     } else {
       console.error("Invalid response format for image search term");

@@ -113,6 +113,17 @@ export async function POST(req: Request, res: Response) {
       }
     }
 
+    await prisma.user.update({
+      where: {
+        id: session.user.id
+      },
+      data: {
+        credits: {
+          decrement: 1,
+        }
+      }
+    });
+
     return NextResponse.json({ course_id: course.id });
   } catch (error) {
     if (error instanceof ZodError) {

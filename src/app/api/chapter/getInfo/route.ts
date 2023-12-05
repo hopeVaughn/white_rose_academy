@@ -22,10 +22,10 @@ export async function POST(req: Request, res: Response) {
 
     const videoId = await searchYoutube(chapter.youtubeSearchQuery);
     let transcript = await getTranscript(videoId);
-    let maxLength = 2000;
+    let maxLength = 1000;
     transcript = transcript.split(" ").slice(0, maxLength).join(" ");
 
-    const systemPromptForSummary = `You are an AI capable of summarizing a YouTube transcript in JSON format. Provide a concise summary of the following transcript in 350 words or less. Example Format: {"summary": "Concise summary of the video content."}`;
+    const systemPromptForSummary = `You are an AI capable of summarizing a YouTube transcript in JSON format. Provide a concise summary of the following transcript in 250 words or less. Example Format: {"summary": "Concise summary of the video content."}`;
 
     // Get summary from AI
     const summaryResponse = await strict_output(systemPromptForSummary, transcript);

@@ -10,7 +10,7 @@ type Props = {
 
 const MainVideoSummary = ({ unit, unitIndex, chapter, chapterIndex }: Props) => {
   return (
-    <div className="flex-[2] mt-16">
+    <div className="flex-1 mt-16">
       <h4 className='text-sm uppercase text-secondary-foreground/60'>
         Unit {unitIndex + 1} &bull; Chapter {chapterIndex + 1}
       </h4>

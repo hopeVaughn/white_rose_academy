@@ -64,11 +64,17 @@ const CoursePage = async ({ params: { slug } }: Props) => {
   const nextChapter = unit.chapters[chapterIndex + 1];
   const prevChapter = unit.chapters[chapterIndex - 1];
   return (
-    <main>
+    <main className='grid grid-cols-4'>
+      {/* Empty column on the left */}
+      <div className="col-span-1"></div>
+
+      {/* Sidebar - Hidden on desktop view */}
       <CourseSideBar course={course} currentChapterid={chapter.id} />
-      <section>
-        <div className="ml-[400px] px-8">
-          <div className="flex">
+
+      {/* Video and Summary */}
+      <div className="col-span-2">
+        <div className="px-8">
+          <div className="flex justify-between items-center">
             <MainVideoSummary
               chapter={chapter}
               chapterIndex={chapterIndex}
@@ -77,12 +83,12 @@ const CoursePage = async ({ params: { slug } }: Props) => {
             />
             <QuizCards chapter={chapter} />
           </div>
-          <div className='flex-[1] h-[1px] mt-4 text-gray-500 bg-gray-500' />
-          <div className="flex pb-8">
+          <div className='h-[1px] mt-4 text-gray-500 bg-gray-500' />
+          <div className="flex justify-between">
             {prevChapter && (
               <Link
                 href={`/course/${courseId}/${unitIndex}/${chapterIndex - 1}`}
-                className="flex mt-4 mr-auto w-fit">
+                className="flex items-center mt-4">
                 <div className="flex items-center">
                   <ChevronLeft className="w-6 h-6 mr-1" />
                   <div className="flex flex-col items-start">
@@ -99,7 +105,7 @@ const CoursePage = async ({ params: { slug } }: Props) => {
             {nextChapter && (
               <Link
                 href={`/course/${courseId}/${unitIndex}/${chapterIndex + 1}`}
-                className="flex mt-4 ml-auto w-fit">
+                className="flex items-center mt-4">
                 <div className="flex items-center">
                   <div className="flex flex-col items-start">
                     <span className="text-sm text-secondary-foreground/60 ">
@@ -115,9 +121,13 @@ const CoursePage = async ({ params: { slug } }: Props) => {
             )}
           </div>
         </div>
-      </section>
+      </div>
+
+      {/* Empty column on the right */}
+      <div className="col-span-1"></div>
     </main>
   );
+
 
 };
 

@@ -6,6 +6,7 @@ import { redirect } from 'next/navigation';
 import React from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
+import { getAuthSession } from '@/lib/auth';
 
 type Props = {
   params: {
@@ -14,11 +15,21 @@ type Props = {
 };
 
 const CoursePage = async ({ params: { slug } }: Props) => {
+  const session = await getAuthSession();
+  const userId = session?.user?.id;
   const [courseId, unitIndexParam, chapterIndexParam] = slug;
   console.log("COURSE ID FROM /course/[...slug]/page.tsx", slug);
 
-  const course = await prisma.course.findUnique({
-    where: { id: courseId },
+  if (!userId) {
+    // handle case where user is not logged in
+    return redirect('/gallery');
+  }
+
+  const course = await prisma.course.findFirst({
+    where: {
+      id: courseId,
+      userId: userId, // Ensure the course belongs to the authenticated user
+    },
     include: {
       units: {
         include: {
@@ -35,7 +46,8 @@ const CoursePage = async ({ params: { slug } }: Props) => {
   console.log("COURSE FROM /course/[...slug]/page.tsx", course?.units);
 
   if (!course) {
-    return redirect('/gallery');
+    // Handle unauthorized access
+    return redirect('/unauthorized'); // Redirect to an unauthorized access page or similar
   }
   let unitIndex = parseInt(unitIndexParam);
   let chapterIndex = parseInt(chapterIndexParam);

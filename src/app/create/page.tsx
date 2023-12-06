@@ -8,6 +8,8 @@ type Props = {};
 
 const CreatePage = async (props: Props) => {
   const session = await getAuthSession();
+  console.log("CreatePage: session: ", session);
+
   if (!session?.user) {
     return redirect('/gallery');
   }

@@ -1,11 +1,21 @@
 import GalleryCourseCard from '@/components/GalleryCourseCard';
 import { prisma } from '@/lib/db';
+import { getAuthSession } from '@/lib/auth';
 import React from 'react';
 
 type Props = {};
 
 const GalleryPage = async (props: Props) => {
+  const session = await getAuthSession();
+  const userId = session?.user?.id;
+
+  if (!userId) {
+    // handle case where user is not logged in
+    return <div className="">Please log in to view your courses</div>;
+  }
+
   const courses = await prisma.course.findMany({
+    where: { userId: userId }, // Fetch courses that belong to the logged-in user
     include: {
       units: {
         include: {
@@ -14,6 +24,7 @@ const GalleryPage = async (props: Props) => {
       }
     }
   });
+
   return (
     <div className='py-8 mx-auto max-w-7xl'>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 place-items-center">

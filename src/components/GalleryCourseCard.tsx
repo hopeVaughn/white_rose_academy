@@ -12,6 +12,7 @@ type Props = {
 };
 
 const GalleryCourseCard = async ({ course }: Props) => {
+  console.log("GalleryCourseCard: course: ", course);
 
   return (
     <>

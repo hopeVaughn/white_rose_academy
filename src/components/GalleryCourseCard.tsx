@@ -16,7 +16,7 @@ const GalleryCourseCard = ({ course }: Props) => {
 
   return (
     <>
-      <div className='border rounded-lg border-secondary overflow-hidden'>
+      <div className='border rounded-lg border-secondary overflow-hidden min-h-full'>
         <div className="relative w-full h-60"> {/* Use Tailwind's h-60 for a fixed height */}
           <Link
             href={`/course/${course.id}/0/0`}

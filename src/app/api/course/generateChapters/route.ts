@@ -29,43 +29,46 @@ export async function POST(req: Request, res: Response) {
       return new NextResponse('No available credits at this time', { status: 402 });
     }
     const body = await req.json();
-    const { title } = createChapterSchema.parse(body);
+    const { title, units } = createChapterSchema.parse(body);
 
-    const systemPromptForUnits = `You are an advanced AI teacher capable of generating course details in JSON format. Generate relevant chapters and their titles for a course titled '${title}'. Each unit should be a JSON object containing the unit title and an array of chapters, each with a youtube_search_query and a chapter_title.
+    console.log("Received title and units:", title, units);
 
+    const systemPromptForUnits = `
+    You are an advanced AI teacher capable of generating course details in JSON format. 
+    Generate relevant chapters and their titles for a course titled '${title}' covering the following units: 
+    ${units.join(", ")}. 
+    Each unit should be a JSON object containing the unit title and an array of chapters, each with a youtube_search_query and a chapter_title.
+    
     Example Format:
     {
       "units": [
         {
-          "unit_title": "Introduction to Sewing",
+          "unit_title": "First Unit from User Input",
           "chapters": [
             {
-              "chapter_title": "Basics of Sewing Machines",
-              "youtube_search_query": "Sewing machine basics for beginners"
+              "chapter_title": "Chapter Title Based on First Unit",
+              "youtube_search_query": "Relevant Search Query"
             },
-            {
-              "chapter_title": "Fundamental Sewing Techniques",
-              "youtube_search_query": "Basic sewing techniques tutorial"
-            }
-          ]
-        },
-        {
-          "unit_title": "Advanced Sewing Projects",
-          "chapters": [
             // More chapters here...
           ]
-        }
+        },
+        // More units here...
       ]
     }`;
+
+
+
     const userPromptForUnits = `Generate a course about ${title}. Provide chapters for each unit with detailed youtube search queries for informative, relevant, and educational videos.`;
 
     const outputResponse = await strict_output(systemPromptForUnits, userPromptForUnits);
 
     if (!outputResponse || !Array.isArray(outputResponse) || outputResponse.length === 0) {
+      console.log("Invalid GPT-3 response format");
       throw new Error('Invalid response format from GPT function');
     }
 
     const outputUnits = outputResponse[0].units || [];
+    console.log("GPT-3 Output Units:", outputUnits);
 
     const systemPromptForImage = `You are an AI capable of retrieving the most appropriate and relevant image for a course titled: '${title}'. Output the image search term in JSON format for use with the Unsplash API.
 
@@ -93,6 +96,7 @@ export async function POST(req: Request, res: Response) {
         user: { connect: { id: userId } },
       },
     });
+    console.log("Course created with ID:", course.id);
 
     for (const unit of outputUnits) {
       const prismaUnit = await prisma.unit.create({
@@ -101,6 +105,7 @@ export async function POST(req: Request, res: Response) {
           courseId: course.id,
         },
       });
+      console.log("Unit created with ID:", prismaUnit.id);
 
       if (unit.chapters && Array.isArray(unit.chapters)) {
         await prisma.chapter.createMany({
@@ -113,6 +118,7 @@ export async function POST(req: Request, res: Response) {
       }
     }
 
+
     await prisma.user.update({
       where: {
         id: session.user.id
@@ -123,10 +129,11 @@ export async function POST(req: Request, res: Response) {
         }
       }
     });
-
+    console.log("User credits decremented");
     return NextResponse.json({ course_id: course.id });
   } catch (error) {
     if (error instanceof ZodError) {
+      console.error("Error in POST /api/course/generateChapters:", error);
       return new NextResponse("invalid body", { status: 400 });
     }
     console.error("Error in POST:", error);

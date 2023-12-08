@@ -16,7 +16,7 @@ type Props = {
 };
 
 const CourseSideBar = ({ course, currentChapterid }: Props) => {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
 
   // Handle the closing and opening of the sidebar
   const toggleSidebar = () => {
@@ -38,10 +38,10 @@ const CourseSideBar = ({ course, currentChapterid }: Props) => {
           {/* Close button */}
           <button
             onClick={toggleSidebar}
-            className="absolute top-4 right-4 p-2 rounded-full border border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+            className="absolute top-5 right-5 p-2 rounded-full border border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
             <X className="w-8 h-8" />
           </button>
-          <h1 className="text-4xl font-bold">{course.name}</h1>
+          <h1 className="text-4xl font-bold pt-10">{course.name}</h1>
           {course.units.map((unit, unitIndex) => (
             <div key={unit.id} className="mt-4">
               <h2 className='text-sm uppercase text-secondary-foreground/60'>Unit {unitIndex + 1}</h2>

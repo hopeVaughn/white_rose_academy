@@ -1,5 +1,4 @@
 'use client';
-
 import { cn } from '@/lib/utils';
 import { Chapter, Course, Unit } from '@prisma/client';
 import Link from 'next/link';
@@ -37,7 +36,9 @@ const CourseSideBar = ({ course, currentChapterid }: Props) => {
       >
         <div dir="ltr"> {/* Left to right direction for the content */}
           {/* Close button */}
-          <button onClick={toggleSidebar} className="absolute top-0 right-0 p-2">
+          <button
+            onClick={toggleSidebar}
+            className="absolute top-4 right-4 p-2 rounded-full border border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
             <X className="w-8 h-8" />
           </button>
           <h1 className="text-4xl font-bold">{course.name}</h1>

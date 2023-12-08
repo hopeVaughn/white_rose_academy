@@ -14,7 +14,7 @@ type Props = {
 };
 
 const QuizCards = ({ chapter }: Props) => {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
   const [answers, setAnswers] = React.useState<Record<string, string>>({});
   const [questionState, setQuestionState] = React.useState<Record<string, boolean | null>>({});
 
@@ -46,13 +46,15 @@ const QuizCards = ({ chapter }: Props) => {
         'h-auto my-auto rounded-l-3xl bg-secondary p-6 overflow-auto z-10'
       )}>
         {/* Toggle button */}
-
-        <button onClick={toggleQuizCards} className="absolute top-0 left-0 ml-2 mb-2 mt-2">
+        <button
+          onClick={toggleQuizCards}
+          className="absolute top-4 left-4 p-2 rounded-full border border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+        >
           {isOpen ? <X className="w-8 h-8" /> : <ChevronLeft className="w-6 h-6" />}
         </button>
         {/* Quiz content */}
-        <section className="mt-4 flex-col">
-          <h1 className="text-2xl font-bold">Concept Check</h1>
+        <section className="mt-12 flex-col">
+          <h1 className="text-2xl font-bold">Comprehension Check</h1>
           {chapter.questions.map((question) => {
             const options = JSON.parse(question.options);
             console.log("QUIZ CARD OPTIONS: ", options);

@@ -37,7 +37,7 @@ export async function POST(req: Request, res: Response) {
     You are an advanced AI teacher capable of generating course details in JSON format. 
     Generate relevant chapters and their titles for a course titled '${title}' covering the following units: 
     ${units.join(", ")}. 
-    Each unit should be a JSON object containing the unit title and an array of chapters, each with a youtube_search_query and a chapter_title.
+    Each unit should be a JSON object containing the unit title and an array of chapters, each with a youtube_search_query and a chapter_title. The youtube_search_query should be a search term that returns relevant and educational videos. The chapter_title should be a title that describes the content of the video.
     
     Example Format:
     {

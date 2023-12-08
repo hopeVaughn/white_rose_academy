@@ -12,43 +12,35 @@ type Question = {
 
 export async function searchYoutube(searchQuery: string) {
   searchQuery = encodeURIComponent(searchQuery);
-  console.log(`Searching YouTube for query: ${searchQuery}`);
-
   const { data } = await axios.get(
     `https://www.googleapis.com/youtube/v3/search?key=${process.env.YOUTUBE_API_KEY}&q=${searchQuery}&videoDuration=medium&videoEmbeddable=true&type=video&maxResults=5`
   );
-
-  console.log(`YouTube search result:`, data);
-
   if (!data) {
-    console.error("YouTube search failed: No data received.");
+    console.log("youtube fail");
+    return null;
+  }
+  if (data.items[0] == undefined) {
+    console.log("youtube fail");
     return null;
   }
 
-  if (!data.items[0]) {
-    console.error("YouTube search failed: No items found.");
-    return null;
-  }
-
-  console.log(`YouTube video ID found: ${data.items[0].id.videoId}`);
   return data.items[0].id.videoId;
 }
 
 export async function getTranscript(videoId: string) {
-  console.log(`Fetching transcript for video ID: ${videoId}`);
-
   try {
     let transcript_arr = await YoutubeTranscript.fetchTranscript(videoId, {
       lang: "en",
       country: "EN",
     });
+    let transcript = "";
+    for (let t of transcript_arr) {
+      transcript += t.text + " ";
+    }
 
-    let transcript = transcript_arr.map(t => t.text).join(" ");
-    console.log(`Transcript fetched for video ID: ${videoId}`);
+    return transcript.replaceAll("\n", "");
 
-    return transcript.replaceAll("\n", " ");
   } catch (error) {
-    console.error(`Failed to fetch transcript for video ID ${videoId}:`, error);
     return "";
   }
 }
@@ -57,27 +49,40 @@ export async function getQuestionsFromTranscript(
   transcript: string,
   course_name: string
 ): Promise<Question[]> {
-  const systemPrompt = `...`; // Your system prompt
-  const userPrompts = new Array(2).fill(
+
+  const systemPrompt =
+    `You are a helpful AI assistant capable of generating MCQ questions and answers in JSON format, suitable for storing in a database. Each question should include a question text, a correct answer, and only three incorrect options. Each answer should not be more than 15 words.
+  Example Response Format:
+  
+    {
+      "question": "What is the main technique to improve in swimming?",
+      "answer": "Consistent practice and technique refinement",
+      "option1": "Only swimming in competitions",
+      "option2": "Focusing solely on speed",
+      "option3": "Consistent practice and technique refinement",
+      "chapterId": "unique_chapter_id"  // To be filled with the actual chapter ID
+    },
+    // More questions here...
+  `;
+  // Create an array of user prompts
+  const userPrompts = new Array(4).fill(
     `Generate an appropriate and challenging MCQ question about ${course_name} with context of the following transcript: ${transcript}`
   );
 
-  console.log(`Generating questions for course: ${course_name}`);
-
+  // Initialize an empty array to store the questions
   const questions: Question[] = [];
 
+  // Iterate over each user prompt to call the strict_output function
   for (const userPrompt of userPrompts) {
+    // Since strict_output returns any[] | null, we need to assert the type here
     const response = await strict_output(systemPrompt, userPrompt) as Question[] | null;
 
-    console.log(`Response from strict_output:`, response);
-
-    if (response && Array.isArray(response)) {
+    if (response) {
+      // If response is an array, concatenate it to the questions array
       questions.push(...response);
-    } else {
-      console.warn(`Response from strict_output was not an array for prompt: ${userPrompt}`);
     }
   }
 
-  console.log(`Total questions generated: ${questions.length}`);
+  // Return the questions array
   return questions;
 }

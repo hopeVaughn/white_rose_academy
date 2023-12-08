@@ -43,7 +43,7 @@ const QuizCards = ({ chapter }: Props) => {
       <div className={cn(
         'w-[400px] fixed top-1/2 right-0 transform -translate-y-1/2 transition-transform duration-300 ease-in-out',
         isOpen ? 'translate-x-0' : 'translate-x-full',
-        'h-auto my-auto rounded-l-3xl bg-secondary p-6 overflow-auto z-10'
+        'max-h-[70%] my-auto rounded-l-3xl bg-secondary p-6 overflow-y-auto z-10'
       )}>
         {/* Toggle button */}
         <button

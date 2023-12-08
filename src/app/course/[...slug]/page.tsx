@@ -64,48 +64,48 @@ const CoursePage = async ({ params: { slug } }: Props) => {
   const nextChapter = unit.chapters[chapterIndex + 1];
   const prevChapter = unit.chapters[chapterIndex - 1];
   return (
-    <main className='flex flex-col'>
+    <main className="flex flex-col flex-1 mt-16 md:mx-4 lg:mx-8 ">
       {/* Sidebar - Hidden on desktop view */}
       <CourseSideBar course={course} currentChapterid={chapter?.id} />
 
       {/* Main content area */}
-      <div className="flex-grow p-4 lg:p-8">
-        {/* Main video and summary layout */}
-        <div className="flex flex-col space-y-4">
-          {/* Video Summary Component */}
+      <section className="flex flex-col flex-1 min-h-[calc(100vh-4rem)] overflow-auto">
+        {/* Video and summary */}
+        <div className="p-4">
           <MainVideoSummary
             chapter={chapter}
             chapterIndex={chapterIndex}
             unit={unit}
             unitIndex={unitIndex}
           />
-
-          {/* Quiz Cards Component */}
-          <QuizCards chapter={chapter} />
         </div>
 
+        {/* Quiz Cards */}
+        <QuizCards chapter={chapter} />
         {/* Navigation links */}
-        <div className='h-[1px] my-4 bg-gray-500' />
-        <div className="flex justify-between space-x-4">
-          {/* Previous Chapter Link */}
-          {prevChapter && (
-            <Link href={`/course/${courseId}/${unitIndex}/${chapterIndex - 1}`} className="flex items-center">
-              <ChevronLeft className="w-6 h-6 mr-1" />
-              <span className="text-xl font-bold">{prevChapter.name}</span>
-            </Link>
-          )}
-
-          {/* Next Chapter Link */}
-          {nextChapter && (
-            <Link href={`/course/${courseId}/${unitIndex}/${chapterIndex + 1}`} className="flex items-center">
-              <span className="text-xl font-bold">{nextChapter.name}</span>
-              <ChevronRight className="w-6 h-6 ml-1" />
-            </Link>
-          )}
-        </div>
-      </div>
+        <footer className="mt-auto p-4 lg:px-8 bottom-0">
+          <div className='h-[1px] my-4 bg-gray-500' />
+          <div className="flex justify-between space-x-4">
+            {/* Previous Chapter Link */}
+            {prevChapter && (
+              <Link href={`/course/${courseId}/${unitIndex}/${chapterIndex - 1}`} className="flex items-center">
+                <ChevronLeft className="w-6 h-6 mr-1" />
+                <span className="text-xl font-bold">{prevChapter.name}</span>
+              </Link>
+            )}
+            {/* Next Chapter Link */}
+            {nextChapter && (
+              <Link href={`/course/${courseId}/${unitIndex}/${chapterIndex + 1}`} className="flex items-center">
+                <span className="text-xl font-bold">{nextChapter.name}</span>
+                <ChevronRight className="w-6 h-6 ml-1" />
+              </Link>
+            )}
+          </div>
+        </footer>
+      </section>
     </main>
   );
+
 };
 
 export default CoursePage;

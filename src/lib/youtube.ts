@@ -65,7 +65,7 @@ export async function getQuestionsFromTranscript(
     // More questions here...
   `;
   // Create an array of user prompts
-  const userPrompts = new Array(4).fill(
+  const userPrompts = new Array(3).fill(
     `Generate an appropriate and challenging MCQ question about ${course_name} with context of the following transcript: ${transcript}`
   );
 

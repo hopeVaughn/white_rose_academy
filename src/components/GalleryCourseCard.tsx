@@ -11,25 +11,23 @@ type Props = {
   };
 };
 
-const GalleryCourseCard = async ({ course }: Props) => {
+const GalleryCourseCard = ({ course }: Props) => {
   console.log("GalleryCourseCard: course: ", course);
 
   return (
     <>
-      <div className='border rounded-lg border-secondary'>
-        <div className="relative">
+      <div className='border rounded-lg border-secondary overflow-hidden'>
+        <div className="relative w-full h-60"> {/* Use Tailwind's h-60 for a fixed height */}
           <Link
-            className='relative block w-fit'
             href={`/course/${course.id}/0/0`}
           >
             <Image
               src={course.image || ''}
-              className="object-cover max-h-[300px] rounded-t-lg w-full"
-              width={300}
-              height={300}
-              alt='picture of the course'
+              className="object-cover w-full h-full"
+              layout="fill"
+              alt='Picture of the course'
             />
-            <span className='absolute px-2 py-1 text-white rounded-md bg-black/60 w-fit bottom-2 left-2 right-2'>
+            <span className='absolute px-2 py-1 text-white rounded-md bg-black/60 w-fit bottom-4 left-4'>
               {course.name}
             </span>
           </Link>
@@ -42,7 +40,7 @@ const GalleryCourseCard = async ({ course }: Props) => {
                 <Link
                   href={`/course/${course.id}/${unitIndex}/0`}
                   key={unit.id}
-                  className='block underline w-fit'
+                  className='block underline'
                 >
                   Unit {unitIndex + 1}: {unit.name}
                 </Link>

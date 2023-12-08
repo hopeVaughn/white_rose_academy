@@ -62,12 +62,12 @@ const CourseSideBar = ({ course, currentChapterid }: Props) => {
           ))}
         </div>
 
-        {/* Tab to reopen sidebar */}
-        <div className={`fixed top-1/2 left-0 transform -translate-y-1/2 z-20 transition-opacity duration-300 ${isOpen ? 'opacity-0' : 'opacity-100'}`} style={{ transitionDelay: isOpen ? '0ms' : '300ms' }}>
-          <button onClick={toggleSidebar} className="p-2 bg-secondary rounded-r-full">
-            <ChevronRight className="w-6 h-6" />
-          </button>
-        </div>
+      </div>
+      {/* Tab to reopen sidebar */}
+      <div className={`fixed top-1/2 left-0 transform -translate-y-1/2 z-20 transition-opacity duration-300 ${isOpen ? 'opacity-0' : 'opacity-100'}`} style={{ transitionDelay: isOpen ? '0ms' : '300ms' }}>
+        <button onClick={toggleSidebar} className="p-2 bg-secondary rounded-r-full">
+          <ChevronRight className="w-6 h-6" />
+        </button>
       </div>
     </>
   );

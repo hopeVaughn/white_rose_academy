@@ -17,29 +17,38 @@ export function ThemeToggle({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) {
   const [mounted, setMounted] = useState(false);
-  const { theme, setTheme } = useTheme();
+  // Use resolvedTheme to take into account system theme settings
+  const { theme, setTheme, resolvedTheme } = useTheme();
 
+  // Ensure component is mounted before rendering to access theme context
   useEffect(() => {
     setMounted(true);
   }, []);
 
+  // Do not render until mounted
   if (!mounted) {
     return null;
   }
 
-  const isThemeActive = (value: string) => theme === value;
+  // Helper function to determine if a theme is active
+  const isThemeActive = (value: string) => theme === value || (!theme && resolvedTheme === value);
 
   return (
     <div className={className} {...props}>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="icon">
-            <Sun className={`h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all ${isThemeActive('dark') ? '-rotate-90 scale-0' : ''}`} />
-            <Moon className={`absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all ${isThemeActive('dark') ? 'rotate-0 scale-100' : ''}`} />
+            {/* Determine icon based on resolvedTheme when theme is set to 'system' */}
+            {(isThemeActive('light') || (isThemeActive('system') && resolvedTheme === 'light')) ? (
+              <Sun className="h-[1.2rem] w-[1.2rem] transition-all" />
+            ) : (
+              <Moon className="h-[1.2rem] w-[1.2rem] transition-all" />
+            )}
             <span className="sr-only">Toggle theme</span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
+          {/* Define the action for each theme option */}
           <DropdownMenuItem onClick={() => setTheme("light")} className={isThemeActive("light") ? "active-theme" : ""}>
             Light
           </DropdownMenuItem>

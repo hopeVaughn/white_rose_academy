@@ -25,7 +25,7 @@ const CourseSideBar = ({ course, currentChapterid }: Props) => {
 
   return (
     <>
-      {/* Sidebar */}
+      {/* Course Sidebar */}
       <div
         dir="rtl" // Right to left direction
         className={cn(

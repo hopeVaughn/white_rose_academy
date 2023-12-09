@@ -28,88 +28,61 @@ const QuizCards = ({ chapter }: Props) => {
     chapter.questions.forEach((question) => {
       const userAnswer = answers[question.id];
       if (!userAnswer) return;
-      if (userAnswer === question.answer) {
-        newQuestionState[question.id] = true;
-      } else {
-        newQuestionState[question.id] = false;
-      }
-      setQuestionState(newQuestionState);
-
+      newQuestionState[question.id] = userAnswer === question.answer;
     });
-  }, [answers, questionState, chapter.questions]);
+    setQuestionState(newQuestionState);
+  }, [answers, chapter.questions]);
+
   return (
     <>
       {/* QuizCards Panel */}
       <div className={cn(
         'w-[400px] fixed top-1/2 right-0 transform -translate-y-1/2 transition-transform duration-300 ease-in-out',
-        isOpen ? 'translate-x-0' : 'translate-x-full',
-        'max-h-[70%] my-auto rounded-l-3xl bg-secondary p-6 overflow-y-auto z-10'
+        isOpen ? 'translate-x-0 z-50' : 'translate-x-full',
+        'h-[70%] my-auto rounded-l-3xl bg-secondary p-6 overflow-y-auto'
       )}>
-        {/* Toggle button */}
+        {/* Close button */}
         <button
           onClick={toggleQuizCards}
-          className="absolute top-4 left-4 p-2 rounded-full border border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+          className="absolute top-5 left-5 z-50 p-2 rounded-full border border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
         >
-          {isOpen ? <X className="w-8 h-8" /> : <ChevronLeft className="w-6 h-6" />}
+          <X className="w-8 h-8" />
         </button>
         {/* Quiz content */}
         <section className="mt-12 flex-col">
           <h1 className="text-2xl font-bold">Comprehension Check</h1>
-          {chapter.questions.map((question) => {
+          {chapter.questions.map((question, index) => {
             const options = JSON.parse(question.options);
             console.log("QUIZ CARD OPTIONS: ", options);
 
             return (
-              <div key={question.id}
-                className={cn(
-                  'mt-4 border border-secondary rounded-lg', {
-                  'bg-green-700': questionState[question.id] === true,
-                  'bg-red-700': questionState[question.id] === false,
-                  'bg-secondary': questionState[question.id] === null
-                }
-                )}>
+              <div key={index} className="mt-4 border border-secondary rounded-lg bg-secondary">
                 <h1>{question.question}</h1>
                 <div className="mt-2">
                   <RadioGroup
-                    onValueChange={(e) => {
-                      setAnswers((prev) => {
-                        return {
-                          ...prev,
-                          [question.id]: e
-                        };
-                      });
+                    onValueChange={(value) => {
+                      setAnswers((prev) => ({
+                        ...prev,
+                        [question.id]: value
+                      }));
                     }}
                   >
-                    {options.map((option: string, index: number) => {
-                      return (
-                        <div
-                          key={index}
-                          className="flex items-center"
-                        >
-                          <RadioGroupItem
-                            value={option}
-                            id={question.id + index.toString()}
-                          />
-                          <Label htmlFor={question.id + index.toString()} className="flex-grow ml-2">{option}</Label>
-                        </div>
-                      );
-                    })}
+                    {options.map((option: string, idx: number) => (
+                      <div key={idx} className="flex items-center">
+                        <RadioGroupItem value={option} id={`${question.id}-${idx}`} />
+                        <Label htmlFor={`${question.id}-${idx}`} className="flex-grow ml-2">{option}</Label>
+                      </div>
+                    ))}
                   </RadioGroup>
                 </div>
               </div>
             );
           })}
         </section>
-        <Button
-          className='w-full mt-4'
-          size='lg'
-          onClick={checkAnswers}
-        >Check Answer
-          <ChevronRight className="w-4 h-4 ml-1" />
-        </Button>
+        <Button className='w-full mt-4' size='lg' onClick={checkAnswers}>Check Answer <ChevronRight className="w-4 h-4 ml-1" /></Button>
       </div>
       {/* Tab to reopen QuizCards */}
-      <div className={`fixed top-1/2 right-0 transform -translate-y-1/2 z-20 transition-opacity duration-300 ${isOpen ? 'opacity-0' : 'opacity-100'}`} style={{ transitionDelay: isOpen ? '0ms' : '300ms' }}>
+      <div className={`fixed top-1/2 right-0 transform -translate-y-1/2 z-40 transition-opacity duration-300 ${isOpen ? 'opacity-0' : 'opacity-100'}`} style={{ transitionDelay: isOpen ? '0ms' : '300ms' }}>
         <button onClick={toggleQuizCards} className="p-2 bg-secondary rounded-l-full">
           <ChevronLeft className="w-6 h-6" />
         </button>

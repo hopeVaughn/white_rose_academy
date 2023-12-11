@@ -12,8 +12,6 @@ type Props = {
 };
 
 const GalleryCourseCard = ({ course }: Props) => {
-  console.log("GalleryCourseCard: course: ", course);
-
   return (
     <>
       <div className='border rounded-lg border-secondary overflow-hidden min-h-full'>

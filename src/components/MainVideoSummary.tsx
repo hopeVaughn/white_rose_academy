@@ -18,19 +18,19 @@ const MainVideoSummary = ({ unit, unitIndex, chapter, chapterIndex }: Props) => 
       <h1 className="text-4xl font-semibold p-2">{chapter.name}</h1>
 
       {/* Responsive iframe container */}
-      <div className="aspect-w-16 aspect-h-9">
+      <div className="aspect-w-16 aspect-h-7">
         <iframe
           title='chapter video'
-          className='w-fill h-4/5'
+          className='w-fill h-fill'
           src={`https://www.youtube.com/embed/${chapter.videoId}`}
           allowFullScreen
         />
       </div>
       {/* Summary */}
-      <section>
-        <h3 className='text-3xl font-semibold'>Summary</h3>
-        <p className="text-secondary-foreground/80">{chapter.summary}</p>
-      </section>
+
+      <h3 className='text-3xl font-semibold mt-4'>Summary</h3>
+      <p className="text-secondary-foreground/80">{chapter.summary}</p>
+
 
     </section>
   );

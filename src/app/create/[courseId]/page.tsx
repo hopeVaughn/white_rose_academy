@@ -35,7 +35,7 @@ const CreateChapters = async ({ params: { courseId } }: Props) => {
   }
   return (
     <div className="flex flex-col items-start max-w-xl mx-auto my-16">
-      <h5 className='text-sm uppercase text-secondary-foreground/60'>
+      <h5 className='text-sm uppercase text-secondary-foreground/60 mt-4 mb-2'>
         Course Name
       </h5>
       <h1 className='text-5xl font-bold'>

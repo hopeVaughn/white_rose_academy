@@ -18,9 +18,9 @@ const Navbar = async (props: Props) => {
           </p>
         </Link>
         <div className="flex items-center">
-          <Link href="/gallery" className='mr-3'>Gallery</Link>
           {session?.user && (
             <>
+              <Link href="/gallery" className='mr-3'>Gallery</Link>
               <Link href="/create" className='mr-3'>Create</Link>
               <Link href="/settings" className='mr-3'>Settings</Link>
             </>

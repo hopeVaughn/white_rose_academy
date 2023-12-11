@@ -1,6 +1,7 @@
 import GalleryCourseCard from '@/components/GalleryCourseCard';
 import { prisma } from '@/lib/db';
 import { getAuthSession } from '@/lib/auth';
+import { redirect } from 'next/navigation';
 import React from 'react';
 import { cn } from '@/lib/utils';
 
@@ -12,7 +13,7 @@ const GalleryPage = async (props: Props) => {
 
   if (!userId) {
     // handle case where user is not logged in
-    return <div className="">Please log in to view your courses</div>;
+    return redirect('/');
   }
 
   const courses = await prisma.course.findMany({

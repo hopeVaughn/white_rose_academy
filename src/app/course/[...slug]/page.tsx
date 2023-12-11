@@ -18,11 +18,10 @@ const CoursePage = async ({ params: { slug } }: Props) => {
   const session = await getAuthSession();
   const userId = session?.user?.id;
   const [courseId, unitIndexParam, chapterIndexParam] = slug;
-  console.log("COURSE ID FROM /course/[...slug]/page.tsx", slug);
 
   if (!userId) {
     // handle case where user is not logged in
-    return redirect('/gallery');
+    return redirect('/');
   }
 
   const course = await prisma.course.findFirst({

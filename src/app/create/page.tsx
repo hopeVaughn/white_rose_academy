@@ -10,7 +10,7 @@ const CreatePage = async (props: Props) => {
   const session = await getAuthSession();
 
   if (!session?.user) {
-    return redirect('/gallery');
+    return redirect('/');
   }
   const isEnrolled = await checkSubscription();
   return (

@@ -2,12 +2,11 @@
 import React from 'react';
 import axios from 'axios';
 import { Chapter } from '@prisma/client';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { cn } from '@/lib/utils';
 import useCourseStore from '@/lib/courseStore';
 import { useToast } from './ui/use-toast';
 import { Loader2, XIcon, SaveAll, Edit } from 'lucide-react';
-import { set } from 'zod';
 
 type Props = {
   chapter: Chapter;
@@ -25,7 +24,32 @@ const ChapterCard = React.forwardRef<ChapterCardHandler, Props>(({ chapter, chap
   const { toast } = useToast();
   const [isEditMode, setIsEditMode] = React.useState(false);
   const chapterNameRef = React.useRef<HTMLInputElement>(null);
+  const queryClient = useQueryClient();
   const { updateChapter } = useCourseStore((state) => state);
+
+  // Mutation for editing chapter details
+  const { mutate: editChapterMutation } = useMutation({
+    mutationFn: async (updatedChapter: { chapterId: string; name: string; }) => {
+      const response = await axios.patch('/api/chapter/editInfo', updatedChapter);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['chapter', chapter.id]);
+      toast({ title: 'Chapter updated successfully' });
+    },
+    onError: (error: any) => {
+      toast({ title: 'Error updating chapter', description: error.message || 'Something went wrong', variant: 'destructive' });
+    }
+  });
+
+  const handleSave = () => {
+    if (chapterNameRef.current) {
+      const updatedChapterName = chapterNameRef.current.value;
+      editChapterMutation({ chapterId: chapter.id, name: updatedChapterName });
+      updateChapter(unitId, chapter.id, { name: updatedChapterName });
+      setIsEditMode(false);
+    }
+  };
 
   const [success, setSuccess] = React.useState<boolean | null>(null);
   const { mutate: getChapterInfo, isPending } = useMutation({
@@ -100,13 +124,13 @@ const ChapterCard = React.forwardRef<ChapterCardHandler, Props>(({ chapter, chap
     setIsEditMode(true);
   };
 
-  const handleSave = () => {
-    if (chapterNameRef.current) {
-      const updatedChapterName = chapterNameRef.current.value;
-      updateChapter(unitId, chapter.id, { name: updatedChapterName });
-      setIsEditMode(false);
-    }
-  };
+  // const handleSave = () => {
+  //   if (chapterNameRef.current) {
+  //     const updatedChapterName = chapterNameRef.current.value;
+  //     updateChapter(unitId, chapter.id, { name: updatedChapterName });
+  //     setIsEditMode(false);
+  //   }
+  // };
 
   const handleCancel = () => {
     setIsEditMode(false);

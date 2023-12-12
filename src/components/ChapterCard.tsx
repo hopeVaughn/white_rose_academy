@@ -113,21 +113,43 @@ const ChapterCard = React.forwardRef<ChapterCardHandler, Props>(({ chapter, chap
   };
 
   return (
-    <div className={cn('px-4 py-2 mt-2 rounded flex justify-between', {
-      'bg-secondary': success === null,
-      'bg-red-500': success === false,
-      'bg-green-500': success === true,
-    })}>
+    <div className={cn(
+      'px-4 py-2 mt-2 rounded flex items-center justify-between',
+      {
+        'bg-secondary': success === null,
+        'bg-red-500': success === false,
+        'bg-green-500': success === true,
+      }
+    )}>
       {isEditMode ? (
         <>
-          <input ref={chapterNameRef} defaultValue={chapter.name} className="flex-1" />
-          <button onClick={handleSave}><SaveAll /></button>
-          <button onClick={handleCancel}><XIcon /></button>
+          <input
+            ref={chapterNameRef}
+            defaultValue={chapter.name}
+            className="flex-1 px-2 py-1 border border-gray-300 rounded"
+          />
+          <button
+            onClick={handleSave}
+            className="ml-2 p-1 text-green-600 hover:text-green-800"
+          >
+            <SaveAll />
+          </button>
+          <button
+            onClick={handleCancel}
+            className="ml-2 p-1 text-red-600 hover:text-red-800"
+          >
+            <XIcon />
+          </button>
         </>
       ) : (
         <>
-          <h5>Chapter {chapterIndex + 1}: {chapter.name}</h5>
-          <button onClick={handleEdit}><Edit /></button>
+          <h5 className="flex-1">Chapter {chapterIndex + 1}: {chapter.name}</h5>
+          <button
+            onClick={handleEdit}
+            className="p-1 text-blue-600 hover:text-blue-800"
+          >
+            <Edit />
+          </button>
         </>
       )}
       {isPending && <Loader2 className='animate-spin' />}

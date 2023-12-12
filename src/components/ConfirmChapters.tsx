@@ -62,6 +62,7 @@ const ConfirmChapters = ({ course }: Props) => {
                     completedChapterIds={completedChapterIds}
                     setCompletedChapterIds={setCompletedChapterIds}
                     ref={chapterRefs[chapter.id]}
+                    unitId={unit.id}
                     key={chapter.id}
                     chapter={chapter}
                     chapterIndex={chapterIndex} />

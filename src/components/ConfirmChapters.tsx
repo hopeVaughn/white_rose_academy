@@ -1,11 +1,13 @@
 'use client';
 import React from 'react';
+import Link from 'next/link';
+import useCourseStore from '@/lib/courseStore';
 import { Course, Unit, Chapter } from '@prisma/client';
 import ChapterCard, { ChapterCardHandler } from './ChapterCard';
 import { Separator } from './ui/separator';
-import Link from 'next/link';
 import { Button, buttonVariants } from './ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+
 type Props = {
   course: Course & {
     userId: string;
@@ -18,6 +20,20 @@ type Props = {
 const ConfirmChapters = ({ course }: Props) => {
   const [loading, setLoading] = React.useState(false);
   const chapterRefs: Record<string, React.RefObject<ChapterCardHandler>> = {};
+  const { setCourse, course: storedCourse } = useCourseStore((state) => ({
+    setCourse: state.setCourse,
+    course: state.course
+  }));
+
+  React.useEffect(() => {
+    setCourse(course);
+  }, [course, setCourse]);
+
+  // Debug output to console
+  React.useEffect(() => {
+    console.log('Stored course data:', storedCourse);
+  }, [storedCourse]);
+
   course.units.forEach((unit) => {
     unit.chapters.forEach((chapter) => {
       // eslint-disable-next-line react-hooks/rules-of-hooks

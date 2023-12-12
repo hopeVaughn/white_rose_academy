@@ -36,7 +36,7 @@ const ChapterCard = React.forwardRef<ChapterCardHandler, Props>(({ chapter, chap
       } catch (error) {
         // Log detailed error
         if (axios.isAxiosError(error)) {
-          console.error('Axios Error:', error.response?.data || error.message);
+          console.error('Axios Error in call from ChapterCard:', error.response?.data || error.message);
         } else {
           console.error('Unexpected Error:', error);
         }
@@ -50,7 +50,7 @@ const ChapterCard = React.forwardRef<ChapterCardHandler, Props>(({ chapter, chap
     onError: (error) => {
       setSuccess(false);
       toast({
-        title: 'Error',
+        title: error.message || 'Error loading chapter info in ChapterCard',
         description: 'Failed to load chapter info',
       });
       addChapterIdToSet();

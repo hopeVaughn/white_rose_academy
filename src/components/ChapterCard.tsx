@@ -60,7 +60,6 @@ const ChapterCard = React.forwardRef<ChapterCardHandler, Props>(({ chapter, chap
           updateChapter(unitId, chapter.id, { name: updatedChapterName });
           queryClient.invalidateQueries({ queryKey: ['course'] });
           toast({ title: 'Chapter updated successfully' });
-          queryClient.refetchQueries({ queryKey: ['course'] });
         }
       });
       setIsEditMode(false);
@@ -139,14 +138,6 @@ const ChapterCard = React.forwardRef<ChapterCardHandler, Props>(({ chapter, chap
   const handleEdit = () => {
     setIsEditMode(true);
   };
-
-  // const handleSave = () => {
-  //   if (chapterNameRef.current) {
-  //     const updatedChapterName = chapterNameRef.current.value;
-  //     updateChapter(unitId, chapter.id, { name: updatedChapterName });
-  //     setIsEditMode(false);
-  //   }
-  // };
 
   const handleCancel = () => {
     setIsEditMode(false);

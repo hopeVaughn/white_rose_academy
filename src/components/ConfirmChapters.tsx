@@ -63,7 +63,8 @@ const ConfirmChapters = ({ courseId }: Props) => {
                     unitId={unit.id}
                     key={chapter.id}
                     chapter={chapter}
-                    chapterIndex={chapterIndex} />
+                    chapterIndex={chapterIndex}
+                  />
                 );
               })}
             </div>

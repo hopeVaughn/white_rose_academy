@@ -20,6 +20,14 @@ export type ChapterCardHandler = {
   triggerLoad: () => void;
 };
 
+type EditChapterPayload = {
+  chapterId: string;
+  updatedData: {
+    name?: string;
+  };
+};
+
+
 const ChapterCard = React.forwardRef<ChapterCardHandler, Props>(({ chapter, chapterIndex, unitId, completedChapterIds, setCompletedChapterIds }, ref) => {
   const { toast } = useToast();
   const [isEditMode, setIsEditMode] = React.useState(false);
@@ -29,24 +37,32 @@ const ChapterCard = React.forwardRef<ChapterCardHandler, Props>(({ chapter, chap
 
   // Mutation for editing chapter details
   const { mutate: editChapterMutation } = useMutation({
-    mutationFn: async (updatedChapter: { chapterId: string; name: string; }) => {
+    mutationFn: async (updatedChapter: EditChapterPayload) => {
       const response = await axios.patch('/api/chapter/editInfo', updatedChapter);
       return response.data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries(['chapter', chapter.id]);
-      toast({ title: 'Chapter updated successfully' });
     },
     onError: (error: any) => {
       toast({ title: 'Error updating chapter', description: error.message || 'Something went wrong', variant: 'destructive' });
     }
   });
 
+
   const handleSave = () => {
     if (chapterNameRef.current) {
       const updatedChapterName = chapterNameRef.current.value;
-      editChapterMutation({ chapterId: chapter.id, name: updatedChapterName });
-      updateChapter(unitId, chapter.id, { name: updatedChapterName });
+      editChapterMutation({
+        chapterId: chapter.id,
+        updatedData: {
+          name: updatedChapterName
+        }
+      }, {
+        onSuccess: () => {
+          updateChapter(unitId, chapter.id, { name: updatedChapterName });
+          queryClient.invalidateQueries({ queryKey: ['course'] });
+          toast({ title: 'Chapter updated successfully' });
+          queryClient.refetchQueries({ queryKey: ['course'] });
+        }
+      });
       setIsEditMode(false);
     }
   };

@@ -1,7 +1,9 @@
 'use client';
 import React from 'react';
 import Link from 'next/link';
-import useCourseStore from '@/lib/courseStore';
+import axios from 'axios';
+import { useQuery } from '@tanstack/react-query';
+import useCourseStore, { ExtendedCourse } from '@/lib/courseStore';
 import { Course, Unit, Chapter } from '@prisma/client';
 import ChapterCard, { ChapterCardHandler } from './ChapterCard';
 import { Separator } from './ui/separator';
@@ -9,32 +11,33 @@ import { Button, buttonVariants } from './ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 type Props = {
-  course: Course & {
-    userId: string;
-    units: (Unit & {
-      chapters: Chapter[];
-    })[];
-  };
+  courseId: string;
 };
 
-const ConfirmChapters = ({ course }: Props) => {
+const ConfirmChapters = ({ courseId }: Props) => {
   const [loading, setLoading] = React.useState(false);
   const chapterRefs: Record<string, React.RefObject<ChapterCardHandler>> = {};
-  const { setCourse, course: storedCourse } = useCourseStore((state) => ({
-    setCourse: state.setCourse,
-    course: state.course
-  }));
+  const { course: storedCourse, setCourse } = useCourseStore();
 
+  // Use `useQuery` to fetch course data
+  const { data, isLoading, isError, error } = useQuery<ExtendedCourse, Error>({
+    queryKey: ['course', courseId],
+    queryFn: () => axios.get(`/api/course/getCourse?courseId=${courseId}`).then(res => res.data.course),
+  });
+
+  // Update zustand store when data is fetched
   React.useEffect(() => {
-    setCourse(course);
-  }, [course, setCourse]);
+    if (data) {
+      setCourse(data);
+    }
+  }, [data, setCourse]);
 
-  // Debug output to console
+  const course = data; // The fetched course data
   React.useEffect(() => {
     console.log('Stored course data:', storedCourse);
   }, [storedCourse]);
 
-  course.units.forEach((unit) => {
+  course!.units.forEach((unit) => {
     unit.chapters.forEach((chapter) => {
       // eslint-disable-next-line react-hooks/rules-of-hooks
       chapterRefs[chapter.id] = React.useRef(null);
@@ -42,13 +45,19 @@ const ConfirmChapters = ({ course }: Props) => {
   });
   const [completedChapterIds, setCompletedChapterIds] = React.useState<Set<String>>(new Set());
   const totalChaptersCount = React.useMemo(() => {
-    return course.units.reduce((acc, cur) => {
+    return course!.units.reduce((acc, cur) => {
       return acc + cur.chapters.length;
     }, 0);
-  }, [course.units]);
+  }, [course!.units]);
+
+  // Handle loading and error states
+  if (isLoading) return <div>Loading...</div>;
+  if (isError) return <div>An error occurred: {error.message}</div>;
+
+
   return (
     <div className='w-full mt-4'>
-      {course.units.map((unit, unitIndex) => {
+      {course!.units.map((unit, unitIndex) => {
         return (
           <div key={unit.id} className="mt-5">
             <h2 className='text-sm uppercase text-secondary-foreground/60'>
@@ -86,7 +95,7 @@ const ConfirmChapters = ({ course }: Props) => {
                 className={buttonVariants({
                   className: "ml-4 font-semibold",
                 })}
-                href={`/course/${course.id}/0/0`}
+                href={`/course/${course!.id}/0/0`}
               >Save & Continue
                 <ChevronRight className='w-4 h-4 ml-2' />
               </Link>

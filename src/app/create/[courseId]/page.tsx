@@ -45,7 +45,7 @@ const CreateChapters = async ({ params: { courseId } }: Props) => {
         <InfoIcon className='w-12 h-12 mr-3 text-blue-400' />
         <div className="">Please have a look at the chapters we&apos;ve generated for each unit and make sure they interest you and are appropriate for your learning goals</div>
       </div>
-      <ConfirmChapters course={course} />
+      <ConfirmChapters courseId={courseId} />
     </div>
   );
 };

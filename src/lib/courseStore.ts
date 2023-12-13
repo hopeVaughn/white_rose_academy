@@ -2,16 +2,16 @@ import { create } from 'zustand';
 import { Chapter, Course as PrismaCourse, Unit as PrismaUnit } from '@prisma/client';
 
 // Extending Prisma types to include nested relations
-interface ExtendedUnit extends PrismaUnit {
+export interface ExtendedUnit extends PrismaUnit {
   chapters: Chapter[];
 }
 
-interface ExtendedCourse extends PrismaCourse {
+export interface ExtendedCourse extends PrismaCourse {
   units: ExtendedUnit[];
 }
 
 // Defining the state structure for the store
-interface CourseState {
+export interface CourseState {
   course: ExtendedCourse | null; // Using ExtendedCourse instead of Course
   setCourse: (course: ExtendedCourse) => void;
   updateChapter: (unitId: string, chapterId: string, newChapterData: Partial<Chapter>) => void;

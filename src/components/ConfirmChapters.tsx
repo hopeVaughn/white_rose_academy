@@ -4,49 +4,72 @@ import Link from 'next/link';
 import axios from 'axios';
 import { useQuery } from '@tanstack/react-query';
 import useCourseStore, { ExtendedCourse } from '@/lib/courseStore';
-import { Course, Unit, Chapter } from '@prisma/client';
 import ChapterCard, { ChapterCardHandler } from './ChapterCard';
 import { Separator } from './ui/separator';
 import { Button, buttonVariants } from './ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { CardSkeleton } from '@/components/ui/skeletons';
+
 type Props = {
   courseId: string;
 };
 
+type ChapterRefs = Record<string, React.RefObject<ChapterCardHandler>>;
+
 const ConfirmChapters = ({ courseId }: Props) => {
   const [loading, setLoading] = React.useState(false);
-  const chapterRefs: Record<string, React.RefObject<ChapterCardHandler>> = {};
+  const [completedChapterIds, setCompletedChapterIds] = React.useState<Set<String>>(new Set());
   const { course: storedCourse, setCourse } = useCourseStore();
 
   // Use `useQuery` to fetch course data
-  const { data: courseData, isPending, isSuccess, isError } = useQuery<ExtendedCourse, Error>({
-    queryKey: ['course', courseId],
-    queryFn: () => axios.get(`/api/course/getCourse?courseId=${courseId}`).then(res => res.data.course),
-  });
-  const course = isSuccess ? courseData : storedCourse; // Either our DB or our Zustand store
+  const {
+    data: courseData,
+    isPending,
+    isSuccess,
+    isError,
+    error } = useQuery<ExtendedCourse, Error>({
+      queryKey: ['course', courseId],
+      queryFn: () => axios.get(`/api/course/getCourse?courseId=${courseId}`).then(res => res.data.course),
+    },
+    );
+  const course = courseData;
+  const chapterRefs = React.useRef<ChapterRefs>({});
   console.log('courseData FROM CONFIRMCHAPTERS:', courseData);
-  console.log('storedCourse FROM CONFIRMCHAPTERS:', storedCourse);
 
-  console.log('COURSE FROM CONFIRMCHAPTERS:', course);
+  React.useEffect(() => {
+    if (course) {
+      course.units.forEach((unit) => {
+        unit.chapters.forEach((chapter) => {
+          const chapterIdKey = String(chapter.id);
+          if (!chapterRefs.current[chapterIdKey]) {
+            chapterRefs.current[chapterIdKey] = React.createRef();
+          }
+        });
+      });
+    }
+  }, [course]);
 
-  course!.units.forEach((unit) => {
-    unit.chapters.forEach((chapter) => {
-      // eslint-disable-next-line react-hooks/rules-of-hooks
-      chapterRefs[chapter.id] = React.useRef(null);
-    });
-  });
-  const [completedChapterIds, setCompletedChapterIds] = React.useState<Set<String>>(new Set());
+
   const totalChaptersCount = React.useMemo(() => {
-    return course!.units.reduce((acc, cur) => {
-      return acc + cur.chapters.length;
-    }, 0);
-  }, [course!.units]);
+    if (!course || !course.units) {
+      return 0; // Return 0 if course or course.units is undefined
+    }
+    return course.units.reduce((acc, unit) => acc + unit.chapters.length, 0);
+  }, [course?.units]); // Depend on course.units
+
+
+  if (isPending) {
+    return <CardSkeleton />; // Show loading state
+  }
+
+  if (isError) {
+    return <div>Error: {error?.message}</div>; // Show error state
+  }
 
 
   return (
     <div className='w-full mt-4'>
-      {course!.units.map((unit, unitIndex) => {
+      {isSuccess && course?.units.map((unit, unitIndex) => {
         return (
           <div key={unit.id} className="mt-5">
             <h2 className='text-sm uppercase text-secondary-foreground/60'>
@@ -59,7 +82,7 @@ const ConfirmChapters = ({ courseId }: Props) => {
                   <ChapterCard
                     completedChapterIds={completedChapterIds}
                     setCompletedChapterIds={setCompletedChapterIds}
-                    ref={chapterRefs[chapter.id]}
+                    ref={chapterRefs.current[String(chapter.id)]}
                     unitId={unit.id}
                     key={chapter.id}
                     chapter={chapter}

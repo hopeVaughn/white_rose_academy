@@ -9,7 +9,7 @@ import ChapterCard, { ChapterCardHandler } from './ChapterCard';
 import { Separator } from './ui/separator';
 import { Button, buttonVariants } from './ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-
+import { CardSkeleton } from '@/components/ui/skeletons';
 type Props = {
   courseId: string;
 };
@@ -20,22 +20,15 @@ const ConfirmChapters = ({ courseId }: Props) => {
   const { course: storedCourse, setCourse } = useCourseStore();
 
   // Use `useQuery` to fetch course data
-  const { data, isLoading, isError, error } = useQuery<ExtendedCourse, Error>({
+  const { data: courseData, isPending, isSuccess, isError } = useQuery<ExtendedCourse, Error>({
     queryKey: ['course', courseId],
     queryFn: () => axios.get(`/api/course/getCourse?courseId=${courseId}`).then(res => res.data.course),
   });
+  const course = isSuccess ? courseData : storedCourse; // Either our DB or our Zustand store
+  console.log('courseData FROM CONFIRMCHAPTERS:', courseData);
+  console.log('storedCourse FROM CONFIRMCHAPTERS:', storedCourse);
 
-  // Update zustand store when data is fetched
-  React.useEffect(() => {
-    if (data) {
-      setCourse(data);
-    }
-  }, [data, setCourse]);
-
-  const course = data; // The fetched course data
-  React.useEffect(() => {
-    console.log('Stored course data:', storedCourse);
-  }, [storedCourse]);
+  console.log('COURSE FROM CONFIRMCHAPTERS:', course);
 
   course!.units.forEach((unit) => {
     unit.chapters.forEach((chapter) => {
@@ -49,10 +42,6 @@ const ConfirmChapters = ({ courseId }: Props) => {
       return acc + cur.chapters.length;
     }, 0);
   }, [course!.units]);
-
-  // Handle loading and error states
-  if (isLoading) return <div>Loading...</div>;
-  if (isError) return <div>An error occurred: {error.message}</div>;
 
 
   return (

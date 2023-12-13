@@ -14,6 +14,7 @@ import { useMutation } from '@tanstack/react-query';
 import axios from 'axios';
 import { useToast } from './ui/use-toast';
 import { useRouter } from 'next/navigation';
+import useCourseStore from '@/lib/courseStore';
 import SubscriptionAction from './SubscriptionAction';
 type Props = {
   isEnrolled: boolean;
@@ -22,13 +23,14 @@ type Props = {
 type Input = z.infer<typeof createChapterSchema>;
 
 const CreateCourseForm = ({ isEnrolled }: Props) => {
+  const { course: storedCourse, setCourse } = useCourseStore();
   const router = useRouter();
   const { toast } = useToast();
   const { mutate: createChapters, isPending } = useMutation({
     mutationFn: async ({ title, units }: Input) => {
       const response = await axios.post('/api/course/generateChapters', { title, units });
       return response.data;
-    }
+    },
   });
   const form = useForm<Input>({
     resolver: zodResolver(createChapterSchema),
@@ -40,31 +42,41 @@ const CreateCourseForm = ({ isEnrolled }: Props) => {
 
   function onSubmit(data: Input) {
     if (data.units.some((unit) => unit === '')) {
-      toast({
-        title: 'Error',
-        description: 'Please fill out all the fields',
-        variant: 'destructive',
-      });
+      toast({ title: 'Error', description: 'Please fill out all the fields', variant: 'destructive' });
       return;
     }
     createChapters(data, {
-      onSuccess: ({ course_id }) => {
-        toast({
-          title: 'Success',
-          description: 'Course created successfully',
-        });
-        router.push(`/create/${course_id}`);
+      onSuccess: async ({ course_id }) => {
+        console.log('Course ID FROM CREATECOURSEFORM:', course_id);
+
+        try {
+          const response = await axios.get(`/api/course/getCourse?courseId=${course_id}`);
+          if (response.data.success) {
+            const fetchedCourse = response.data.course;
+            setCourse(fetchedCourse);
+            console.log('COURSE SAVED IN ZUSTAND STORE @ CREATECOURSEFORM', fetchedCourse);
+            toast({ title: 'Success', description: 'Course created successfully' });
+            router.push(`/create/${course_id}`);
+          } else {
+            throw new Error(response.data.error || 'Failed to fetch course details');
+          }
+        } catch (error) {
+          // Asserting that error is of type Error
+          const err = error as Error;
+          console.error('Failed to fetch course details:', err);
+          toast({
+            title: 'Error',
+            description: err.message || 'Failed to fetch course details',
+            variant: 'destructive'
+          });
+        }
       },
       onError: (error) => {
-        toast({
-          title: 'Error',
-          description: error.message || 'Something went wrong',
-          variant: 'destructive',
-        });
+        toast({ title: 'Error', description: error.message || 'Something went wrong', variant: 'destructive' });
       },
     });
-
   }
+
 
   form.watch();
 

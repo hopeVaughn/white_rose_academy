@@ -3,7 +3,8 @@ import { getAuthSession } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { InfoIcon } from 'lucide-react';
 import { redirect } from 'next/navigation';
-import React from 'react';
+import React, { Suspense } from 'react';
+import { CardSkeleton } from '@/components/ui/skeletons';
 type Props = {
   params: {
     courseId: string;
@@ -20,14 +21,7 @@ const CreateChapters = async ({ params: { courseId } }: Props) => {
     where: {
       id: courseId,
       userId: session.user.id, // Ensure the course belongs to the logged-in user
-    },
-    include: {
-      units: {
-        include: {
-          chapters: true,
-        },
-      },
-    },
+    }
   });
 
   if (!course) {
@@ -45,7 +39,9 @@ const CreateChapters = async ({ params: { courseId } }: Props) => {
         <InfoIcon className='w-12 h-12 mr-3 text-blue-400' />
         <div className="">Please have a look at the chapters we&apos;ve generated for each unit and make sure they interest you and are appropriate for your learning goals</div>
       </div>
-      <ConfirmChapters courseId={courseId} />
+      <Suspense fallback={<CardSkeleton />}>
+        <ConfirmChapters courseId={courseId} />
+      </Suspense>
     </div>
   );
 };

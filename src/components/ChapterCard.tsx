@@ -110,7 +110,6 @@ const ChapterCard = React.forwardRef<ChapterCardHandler, Props>(({ chapter, chap
       addChapterIdToSet();
     }
   }, [chapter, addChapterIdToSet]);
-
   React.useImperativeHandle(ref, () => ({
     async triggerLoad() {
       if (chapter.videoId) {

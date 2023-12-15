@@ -8,8 +8,7 @@ import ChapterCard, { ChapterCardHandler } from './ChapterCard';
 import { Separator } from './ui/separator';
 import { Button, buttonVariants } from './ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { CardSkeleton } from '@/components/ui/skeletons';
-
+import Loading from '@/components/Loading';
 type Props = {
   courseId: string;
 };
@@ -35,7 +34,7 @@ const ConfirmChapters = ({ courseId }: Props) => {
   }, [course?.units]);
 
   if (isPending) {
-    return <CardSkeleton />;
+    return <Loading />;
   }
 
   if (isError) {

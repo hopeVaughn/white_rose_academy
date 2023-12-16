@@ -16,7 +16,6 @@ type Props = {
 const ConfirmChapters = ({ courseId }: Props) => {
   const [loading, setLoading] = useState(false);
   const [completedChapterIds, setCompletedChapterIds] = useState<Set<String>>(new Set());
-  const { course: storedCourse, setCourse } = useCourseStore();
   const chapterRefs = useRef<Record<string, React.RefObject<ChapterCardHandler>>>({});
 
   const { data: courseData, isPending, isSuccess, isError, error } = useQuery<ExtendedCourse, Error>({

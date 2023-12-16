@@ -85,6 +85,8 @@ const ChapterCard = forwardRef<ChapterCardHandler, Props>(
       }
     });
 
+    const hideIcon = isPending || success !== null;
+
     const addChapterIdToSet = useCallback(() => {
       setCompletedChapterIds((prev) => {
         const newSet = new Set(prev);
@@ -165,12 +167,15 @@ const ChapterCard = forwardRef<ChapterCardHandler, Props>(
         ) : (
           <>
             <h5 className="flex-1">Chapter {chapterIndex + 1}: {chapter.name}</h5>
-            <button
-              onClick={handleEdit}
-              className="p-1 text-blue-600 hover:text-blue-800"
-            >
-              <Edit />
-            </button>
+            {!hideIcon && (
+              <button
+                onClick={handleEdit}
+                className="p-1 text-blue-600 hover:text-blue-800"
+              >
+                <Edit />
+              </button>
+            )
+            }
           </>
         )}
         {isPending && <Loader2 className='animate-spin' />}
